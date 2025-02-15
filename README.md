@@ -1,4 +1,4 @@
-# Folder Tider:
+# Folder_Tider
 Tide your folder and make it tidy
 - If your folder have many and random files and looks bad
 - My app tide your folder to folder for (APPS, VIDEOS, ARCHIVES , IMAGES, DATABASES , BOOKS , FOLDERS, Others , ...)
