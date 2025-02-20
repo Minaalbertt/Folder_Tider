@@ -2,7 +2,7 @@
 - If your folder have many and random files and looks bad
 - My app tide your folder to folder for (APPS, VIDEOS, ARCHIVES , IMAGES, DATABASES , BOOKS , FOLDERS, Others , ...)
 #### How to run:
-- Firstly you should installed python in your device (Soon. I will convert this python file to real app)
+- Firstly you should installed python in your device (Soon. I will convert this python file to real app) and install requirements  <code>pip install -r requirements.txt</code>
 - After that you should download this files to your local device and extarct zip file
 - After that you should write in bash (cmd , powershell) <code>python "FolderTiderPath\Folder_Tider_CMD.py" "FolderPathThatYouWantToTideIt"</code>
 - Example command: <code>python "C:\FolderTider\Folder_Tider_CMD.py" "D:\Downloads"</code>
