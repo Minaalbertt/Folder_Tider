@@ -2,10 +2,6 @@
 - If your folder have many and random files and looks bad
 - My app tide your folder to folder for (APPS, VIDEOS, ARCHIVES , IMAGES, DATABASES , BOOKS , FOLDERS, Others , ...)
 ---
-### Folder Tider:
-- If your folder have many and random files and looks bad
-- My app tide your folder to folder for (APPS, VIDEOS, ARCHIVES , IMAGES, DATABASES , BOOKS , FOLDERS, Others , ...)
----
 #### How to run:
 - Firstly you should installed python in your device (Soon. I will convert this python file to real app) and install requirements 
   ```batch
