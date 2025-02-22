@@ -1,81 +1,109 @@
-#start of import functions ↓↓
-import time,sys,schedule,threading,os
+import time
+import sys
+import schedule
+import threading
+import os
 from pathlib import Path
+import logging
 
-def organize():
-    # to get the directly from the entry 
-        dic = sys.argv[1]
+# Constants
+FILE_TYPES = {
+    'IMAGES': {'jpg', 'png', 'gif', 'jpeg', 'ico'},
+    'AUDIO': {'mp3', 'wav', 'flac'},
+    'VIDEOS': {'mp4', 'avi', 'mkv', 'webm'},
+    'SHEETS': {'xls', 'xlsx', 'gsheet'},
+    'DOCS': {'doc', 'docx', 'gdoc'},
+    'BOOKS': {'pdf', 'epub', 'mobi'},
+    'ARCHIVES': {'zip', 'tar', 'rar'},
+    'DATABASES': {'db', 'sql', 'csv', 'json', 'tsv'},
+    'OTHER_DOCS': {'txt', 'md', 'ppt', 'pptx'},
+    'PYTHON': {'py', 'pyw', 'ipynb'},
+    'JAVASCRIPT': {'js'},
+    'HTML': {'html', 'htm'},
+    'APPS': {'exe', 'msi', 'bat'},
+    'FONTS': {'ttf', 'otf', 'woff', 'woff2'},
+}
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def validate_folder_path(folder_path: str) -> Path:
+    """Validate the provided folder path."""
+    if not folder_path:
+        logging.error("Error: Please provide a folder path as an argument.")
+        sys.exit(1)
     
+    path = Path(folder_path)
+    if not path.exists():
+        logging.error(f"Error: The folder '{folder_path}' does not exist.")
+        sys.exit(1)
+    
+    return path
+
+def create_folder_if_not_exists(folder_path: Path) -> None:
+    """Create a folder if it does not exist."""
+    if not folder_path.exists():
+        folder_path.mkdir()
+
+def move_file(file: Path, target_folder: Path) -> None:
+    """Move a file to the target folder."""
+    try:
+        os.rename(file, target_folder / file.name)
+    except FileExistsError:
+        filename = file.stem
+        new_filename = f"{filename}(1){file.suffix}"
+        os.rename(file, target_folder / new_filename)
+    except Exception as e:
+        logging.error(f"Error moving file {file.name}: {e}")
+
+def organize_files(folder_path: Path) -> None:
+    """Organize files in the specified folder."""
+    for file in folder_path.iterdir():
+        if file.name == 'desktop.ini':
+            continue
         
-
-    # try:
-        # dic to store the correct files in them correct folders 
-        file_type = {
-        'IMAGES': 'jpg, png, gif, jpeg, ico',
-        'AUDIO': 'mp3, wav, flac',
-        'VIDEOS': 'mp4, avi, mkv, webm',
-        'SHEETS': 'xls, xlsx, gsheet',
-        'DOCS': 'doc, docx, gdoc',
-        'BOOKS': 'pdf, epub, mobi',
-        'ARCHIVES': 'zip, tar, rar',
-        'DATABASES': 'db, sql, csv, json, tsv',
-        'OTHER_DOCS': 'txt, md, ppt, pptx',
-        'PYTHON': 'py, pyw, ipynb',
-        'JAVASCRIPT': 'js',
-        'HTML': 'html, htm',
-        'APPS': 'exe, msi ,bat',
-        }
-        # to organize files and move it to them folders 
-        def organize_files(dic):
-            # convert dic to path 
-            path = Path(dic)
-            # to move files in them folders
-            def move(folder):
-                try:
-                    folder_dic = path / folder
-                       
-                    if not folder_dic.exists():
-                        folder_dic.mkdir()
-                    
-                    os.rename(file,os.path.join(folder_dic,file.name))
-                except:
-                    filename = file.stem
-                    os.rename(file,os.path.join(folder_dic,filename+'(1)'+file_ext))
-
-            # to list the files and store it to them folders 
-            for file in path.iterdir():
-                # to check files if it files or folders 
-                if file.name == 'desktop.ini':
-                    continue
-                if file.is_file():
-                    # to store file ext
-                    file_ext = file.suffix[1:]
-                    if file_ext == '' or file_ext == ' ':
-                        move('OTHERS')
-                        break
-                    # to store the items of file_type dic in key and value 
-                    for key, value in file_type.items():
-                        # to move files in them correct folders 
-                        if file_ext in value:
-                            move(key)
-                            break
-                    # If the ext of the files not in value of keys it will move it to "OTHERS" folder 
-                    else:
-                        move('OTHERS')
+        if file.is_file():
+            file_ext = file.suffix[1:].lower()
+            if not file_ext:
+                move_file(file, folder_path / 'OTHERS')
+                continue
             
-                if file.is_dir() and file.name not in list(file_type.keys()) and file.name not in ['OTHERS'] :
-                        try:
-                            move('Folders')
-                        except:
-                            pass                      
-        # to run the function 
-        organize_files(dic)
-        # to know the users the program has organized the folder 
-        print('Done!')
-        # to organize the folder every one minute 
-        # schedule.every(1).minutes.do(organize_files,dic)
-        # here ↑
-        # if __name__ == '__main__':
-        #     schedule.run_pending()
-        #     time.sleep(1)
-organize()
+            moved = False
+            for folder_name, extensions in FILE_TYPES.items():
+                if file_ext in extensions:
+                    target_folder = folder_path / folder_name
+                    create_folder_if_not_exists(target_folder)
+                    move_file(file, target_folder)
+                    moved = True
+                    break
+            
+            if not moved:
+                move_file(file, folder_path / 'OTHERS')
+        
+        elif file.is_dir():
+            # Skip if the folder is already a target folder (e.g., 'Folders', 'IMAGES', etc.)
+            if file.name in FILE_TYPES.keys() or file.name in ['OTHERS', 'Folders']:
+                continue
+            
+            try:
+                # Create the 'Folders' directory if it doesn't exist
+                target_folder = folder_path / 'Folders'
+                create_folder_if_not_exists(target_folder)
+                
+                # Move the folder into the 'Folders' directory
+                move_file(file, target_folder)
+            except Exception as e:
+                logging.error(f"Error moving folder {file.name}: {e}")
+
+def organize() -> None:
+    """Main function to organize the folder."""
+    if len(sys.argv) < 2:
+        logging.error("Error: Please provide a folder path as an argument.")
+        sys.exit(1)
+    
+    folder_path = validate_folder_path(sys.argv[1])
+    organize_files(folder_path)
+    logging.info('Done!')
+
+if __name__ == '__main__':
+    organize()
