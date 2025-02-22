@@ -17,7 +17,7 @@
 #### Note:
 > If you want to make this file shedule to any file you can uncomment:
 > 
-> <code># schedule.every(1).minutes.do(organize_files,dic)
+> <code batch># schedule.every(1).minutes.do(organize_files,dic)
         # here ↑
         # if __name__ == '__main__':
         #     schedule.run_pending()
