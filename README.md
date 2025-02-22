@@ -17,11 +17,13 @@
 #### Note:
 > If you want to make this file shedule to any file you can uncomment:
 > 
-> <code batch># schedule.every(1).minutes.do(organize_files,dic)
+```batch
+schedule.every(1).minutes.do(organize_files,dic)
         # here ↑
         # if __name__ == '__main__':
         #     schedule.run_pending()
-        #     time.sleep(1)</code>
+        #     time.sleep(1)</code>\
+```
 > From line 76 to line 80
 >
 > After that you should also in line 7 <code>dic = sys.argv[1]</code> replace <code>sys.argv[1]</code> to your folder path for example <code>dic = 'D:\Downloads' #my folder path</code>
