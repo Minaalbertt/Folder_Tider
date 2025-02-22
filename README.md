@@ -19,10 +19,10 @@
 > 
 ```batch
 schedule.every(1).minutes.do(organize_files,dic)
-        # here ↑
-        # if __name__ == '__main__':
-        #     schedule.run_pending()
-        #     time.sleep(1)</code>\
+# here ↑
+# if __name__ == '__main__':
+#     schedule.run_pending()
+#     time.sleep(1)</code>\
 ```
 > From line 76 to line 80
 >
