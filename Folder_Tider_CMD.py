@@ -1,26 +1,29 @@
+#!/usr/bin/env python
 import time
 import sys
 import schedule
 import threading
 import os
+import shutil
 from pathlib import Path
 import logging
 
 # Constants
 FILE_TYPES = {
     'IMAGES': {'jpg', 'png', 'gif', 'jpeg', 'ico'},
+  
     'AUDIO': {'mp3', 'wav', 'flac'},
     'VIDEOS': {'mp4', 'avi', 'mkv', 'webm'},
     'SHEETS': {'xls', 'xlsx', 'gsheet'},
     'DOCS': {'doc', 'docx', 'gdoc'},
     'BOOKS': {'pdf', 'epub', 'mobi'},
-    'ARCHIVES': {'zip', 'tar', 'rar'},
+    'ARCHIVES': {'zip', 'tar', 'rar' , 'gz'},
     'DATABASES': {'db', 'sql', 'csv', 'json', 'tsv'},
     'OTHER_DOCS': {'txt', 'md', 'ppt', 'pptx'},
     'PYTHON': {'py', 'pyw', 'ipynb'},
     'JAVASCRIPT': {'js'},
     'HTML': {'html', 'htm'},
-    'APPS': {'exe', 'msi', 'bat'},
+    'APPS': {'exe', 'msi', 'bat' , 'deb' , 'sh'},
     'FONTS': {'ttf', 'otf', 'woff', 'woff2'},
 }
 
@@ -48,16 +51,20 @@ def create_folder_if_not_exists(folder_path: Path) -> None:
 def move_file(file: Path, target_folder: Path) -> None:
     """Move a file to the target folder."""
     try:
-        os.rename(file, target_folder / file.name)
+        shutil.move(file, target_folder / file.name)
     except FileExistsError:
         filename = file.stem
         new_filename = f"{filename}(1){file.suffix}"
-        os.rename(file, target_folder / new_filename)
+        shutil.move(file, target_folder / new_filename)
     except Exception as e:
-        logging.error(f"Error moving file {file.name}: {e}")
+        if not file.exists():
+            logging.error(f"Error moving file {file.name}: {e}")
 
 def organize_files(folder_path: Path) -> None:
     """Organize files in the specified folder."""
+    # Create the 'OTHERS' folder if it doesn't exist
+    others_folder = folder_path / 'OTHERS'
+    
     for file in folder_path.iterdir():
         if file.name == 'desktop.ini':
             continue
@@ -65,7 +72,7 @@ def organize_files(folder_path: Path) -> None:
         if file.is_file():
             file_ext = file.suffix[1:].lower()
             if not file_ext:
-                move_file(file, folder_path / 'OTHERS')
+                move_file(file, others_folder)
                 continue
             
             moved = False
@@ -78,7 +85,9 @@ def organize_files(folder_path: Path) -> None:
                     break
             
             if not moved:
-                move_file(file, folder_path / 'OTHERS')
+                create_folder_if_not_exists(others_folder)
+                time.sleep(.5)
+                move_file(file, others_folder)
         
         elif file.is_dir():
             # Skip if the folder is already a target folder (e.g., 'Folders', 'IMAGES', etc.)
